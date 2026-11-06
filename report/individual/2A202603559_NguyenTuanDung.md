@@ -10,11 +10,13 @@
 
 | Tệp | Có? |
 | --- | --- |
-| [`day01_lab.ipynb`](day01_lab.ipynb) — notebook đã chạy, còn output | ☐ |
-| [`lab1_report.json`](lab1_report.json) — do ô "Báo cáo cuối" sinh ra | ☐ |
-| [`hand_calc.jpg`](hand_calc.jpg) — ảnh tính tay có các bước | ☐ |
+| [`day01_lab.ipynb`](day01_lab.ipynb) — notebook đã chạy, còn output | ✓ |
+| [`lab1_report.json`](lab1_report.json) — do ô "Báo cáo cuối" sinh ra | ✓ |
+| [`hand_calc.jpg`](hand_calc.jpg) — ảnh tính tay có các bước | ✓ |
 
 ## 2. Kết quả chính
+
+```
                                  precision  recall  F1 (test)  F1 (SUB 40)  \
 1. BoW + LogReg (tự code)            0.986   0.809      0.889        0.788   
 2. BoW + MLP (deep learning)         0.976   0.933      0.954        0.947   
@@ -33,21 +35,23 @@
 3c. Encoder (MiniLM) + MLP head      36.461         0.000  
 4a. LLM nhỏ zero-shot              3124.596         0.007  
 4b. LLM lớn zero-shot              3369.620         0.072  
-4c. LLM nhỏ few-shot               5884.720         0.018  
+4c. LLM nhỏ few-shot               5884.720         0.018
+```
 
 ## 3. Dự đoán và thực tế
 
-dl_relu — F1 khi bỏ ReLU. Em đoán mạng bỏ ReLU sẽ có F1 gần logistic regression vì hai lớp Linear liên tiếp có thể gộp thành một lớp. Thực tế, mạng bỏ ReLU đạt 0,960, gần MLP có ReLU (0,954) hơn logistic regression (0,889). Em đã đánh đồng việc hai mô hình có cùng dạng tuyến tính với việc chúng sẽ học ra cùng trọng số. Hai thí nghiệm dùng cách khởi tạo và thuật toán tối ưu khác nhau, nên kết quả có thể khác.
+**dl_relu** — F1 khi bỏ ReLU. Em đoán mạng bỏ ReLU sẽ có F1 gần logistic regression vì hai lớp Linear liên tiếp có thể gộp thành một lớp. Thực tế, mạng bỏ ReLU đạt 0,960, gần MLP có ReLU (0,954) hơn logistic regression (0,889). Em đã đánh đồng việc hai mô hình có cùng dạng tuyến tính với việc chúng sẽ học ra cùng trọng số. Hai thí nghiệm dùng cách khởi tạo và thuật toán tối ưu khác nhau, nên kết quả có thể khác.
 
-hard_eval — Kết quả trên 50 ca khó. Em đoán hai mô hình BoW đạt 60–75% accuracy và prompt injection sẽ là nhóm khó nhất với LLM. Thực tế, cả hai mô hình BoW chỉ đạt 54%, còn hai cấu hình LLM đạt 98% và đúng 6/6 ca prompt injection. Em đã đánh giá thấp mức độ mà cách viết né từ khóa và giọng điệu tự nhiên làm khó BoW. Với LLM có prompt phòng thủ, lỗi thực tế lại là chặn nhầm một tin thường xin địa chỉ để gửi vé hòa nhạc.
+**hard_eval** — Kết quả trên 50 ca khó. Em đoán hai mô hình BoW đạt 60–75% accuracy và prompt injection sẽ là nhóm khó nhất với LLM. Thực tế, cả hai mô hình BoW chỉ đạt 54%, còn hai cấu hình LLM đạt 98% và đúng 6/6 ca prompt injection. Em đã đánh giá thấp mức độ mà cách viết né từ khóa và giọng điệu tự nhiên làm khó BoW. Với LLM có prompt phòng thủ, lỗi thực tế lại là chặn nhầm một tin thường xin địa chỉ để gửi vé hòa nhạc.
 
-ml_lr — Đường loss khi lr=50. Em đoán loss sẽ dao động mạnh kéo dài vì bước cập nhật quá lớn. Thực tế, loss chỉ vọt lên ở đầu rồi giảm nhanh, kết thúc ở 0,007. Bước đầu làm mô hình nghiêng quá mạnh về phía ham, khiến các tin spam bị phạt nặng. Sau đó, gradient được tính lại từ dự đoán mới và các bước cập nhật tiếp theo kéo loss xuống.
+**ml_lr** — Đường loss khi lr=50. Em đoán loss sẽ dao động mạnh kéo dài vì bước cập nhật quá lớn. Thực tế, loss chỉ vọt lên ở đầu rồi giảm nhanh, kết thúc ở 0,007. Bước đầu làm mô hình nghiêng quá mạnh về phía ham, khiến các tin spam bị phạt nặng. Sau đó, gradient được tính lại từ dự đoán mới và các bước cập nhật tiếp theo kéo loss xuống.
 
 ## 4. Phân tích 50 case khó
 
 BoW + MLP tụt F1 nhiều nhất, từ 0,947 trên tập SUB xuống 0,410 trên bộ 50 ca khó, giảm 0,537. Nhóm yếu nhất là né từ khóa, trong đó mô hình bỏ sót cả 6/6 tin spam.
-- Ca #29 — “C0ngr4tulat10ns! Y0u h4ve w0n a £1000 g1ft c4rd…” Tin thay chữ bằng số, chẳng hạn won thành w0n và gift thành g1ft. BoW coi chúng là các token khác, nên những đặc trưng quen thuộc như won và gift không được bật.
-- Ca #31 — “U have been s.e.l.e.c.t.e.d for a c.a.s.h r.e.w.a.r.d…” Dấu chấm làm bộ tách từ chia cash và reward thành các chữ cái rời. BoW không giữ thứ tự token, nên MLP mất tín hiệu từ cụm cash reward dù người đọc vẫn nhận ra.
+
+- **Ca #29** — "C0ngr4tulat10ns! Y0u h4ve w0n a £1000 g1ft c4rd…" Tin thay chữ bằng số, chẳng hạn won thành w0n và gift thành g1ft. BoW coi chúng là các token khác, nên những đặc trưng quen thuộc như won và gift không được bật.
+- **Ca #31** — "U have been s.e.l.e.c.t.e.d for a c.a.s.h r.e.w.a.r.d…" Dấu chấm làm bộ tách từ chia cash và reward thành các chữ cái rời. BoW không giữ thứ tự token, nên MLP mất tín hiệu từ cụm cash reward dù người đọc vẫn nhận ra.
 
 ## 5. Thử thách cá nhân
 
@@ -58,7 +62,7 @@ BoW + MLP tụt F1 nhiều nhất, từ 0,947 trên tập SUB xuống 0,410 trê
 **Kết quả**
 
 | Số nơ-ron ẩn | Số tham số | F1 test | Thời gian huấn luyện |
-|---:|---:|---:|---:|
+| ---: | ---: | ---: | ---: |
 | 4 | 8.009 | 0,953 | 5,70 giây |
 | 512 | 1.025.025 | 0,949 | 54,37 giây |
 
@@ -66,7 +70,8 @@ BoW + MLP tụt F1 nhiều nhất, từ 0,947 trên tập SUB xuống 0,410 trê
 
 ## 6. Phương án cho sản phẩm thật
 
-Em chọn BoW + MLP. Trong lần đo của em, mô hình có p95 = 2,391 ms/tin, dưới SLA 50 ms, và tốc độ xử lý cả lô khoảng 14.491 tin/s, cao hơn tải trung bình 116 tin/s. Mô hình đạt F1 = 0,954 trên toàn tập test, cao nhất trong các phương án đạt SLA, và không tốn phí API.
+Em chọn **BoW + MLP**. Trong lần đo của em, mô hình có p95 = 2,391 ms/tin, dưới SLA 50 ms, và tốc độ xử lý cả lô khoảng 14.491 tin/s, cao hơn tải trung bình 116 tin/s. Mô hình đạt F1 = 0,954 trên toàn tập test, cao nhất trong các phương án đạt SLA, và không tốn phí API.
+
 Đánh đổi em chấp nhận là chất lượng giảm trên tin khó. F1 của BoW + MLP giảm từ 0,947 trên SUB xuống 0,410 trên bộ 50 ca khó, và mô hình bỏ sót cả 6 tin spam né từ khóa. LLM nhỏ zero-shot làm tốt hơn trên bộ khó (F1 = 0,983), nhưng p95 khoảng 3,12 giây, vượt SLA. Trước khi triển khai, em sẽ đo lại p95 của BoW + MLP dưới tải thực tế, kể cả lúc cao điểm.
 
 ## 7. AI log và điều đã học
@@ -84,6 +89,6 @@ Em chọn BoW + MLP. Trong lần đo của em, mô hình có p95 = 2,391 ms/tin,
 | 5 — Stress test | Mô hình nào tụt nhiều nhất? Prompt phòng thủ có giúp không? | AI giúp phân tích theo nhóm lỗi và gợi ý dùng bộ phân loại độc lập để rà soát các tin có kết quả bất đồng. | Em chạy lại 50 ca gốc và sửa kết luận. Cả hai prompt đều đúng `49/50` và đúng `6/6` ca prompt injection. Bản phòng thủ chặn nhầm tin ham `#9`. |
 | 5 — Ca kiểm thử bổ sung | Gợi ý đúng 5 tin nhắn để thử làm khó mô hình tốt nhất. | AI đề xuất 6 tin mẫu và cách lọc kết quả theo ID để tìm ca sai. | Em yêu cầu sửa số lượng từ 6 xuống đúng 5. |
 
-### Điều em hiểu ra hôm nay
+### 📚 Điều em hiểu ra hôm nay
 
 Trước đây em nghĩ hai mô hình có cùng dạng toán học thì điểm F1 sẽ gần nhau, nhưng thí nghiệm bỏ ReLU giúp em thấy cách khởi tạo và tối ưu cũng ảnh hưởng đến kết quả. Em cũng hiểu vì sao một mô hình đạt F1 cao trên tập test thường vẫn có thể bỏ sót cả một nhóm tin viết né từ khóa. Khi chọn mô hình để triển khai, em cần xem nó sai ở đâu và mất bao lâu để xử lý mỗi tin, bên cạnh điểm F1 chung.
